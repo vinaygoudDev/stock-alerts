@@ -45,6 +45,18 @@ async function start() {
   symbols.forEach(s => console.log(`  ${s} → ${getName(s)}`));
   console.log(`\nStock Alerts running — polling every ${INTERVAL / 1000}s`);
   console.log(`Notifications → ntfy.sh/${process.env.NTFY_TOPIC || '(no topic set)'}\n`);
+
+  try {
+    await send({
+      title:    'Stock Alerts deployed',
+      message:  `Watching ${symbols.join(', ')} — polling every ${INTERVAL / 1000}s`,
+      priority: 'low',
+      tags:     ['rocket'],
+    });
+  } catch (e) {
+    console.error(`[notifier] startup ping failed: ${e.message}`);
+  }
+
   poll();
   setInterval(poll, INTERVAL);
 }
