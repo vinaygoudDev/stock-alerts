@@ -1,4 +1,5 @@
 const https   = require('https');
+const axios   = require('axios');
 const { fetchAll, getName } = require('./poller');
 const { send }              = require('./notifier');
 
@@ -11,30 +12,40 @@ function startListener(symbols) {
 }
 
 function connect(cmdTopic, symbols) {
-  const req = https.get(`https://ntfy.sh/${cmdTopic}/sse`, res => {
+  axios.get(`https://ntfy.sh/${cmdTopic}/sse`, {
+    responseType: 'stream',
+    headers: { Accept: 'text/event-stream' },
+    timeout: 0, // no timeout — connection must stay open indefinitely
+  }).then(res => {
     let buffer = '';
 
-    res.on('data', chunk => {
+    res.data.on('data', chunk => {
       buffer += chunk.toString();
       const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep incomplete line for next chunk
+      buffer = lines.pop();
 
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         try {
           const event = JSON.parse(line.slice(6));
+          console.log(`[listener] event received: ${event.event} — ${event.message || ''}`);
           if (event.event === 'message') handleCommand(event.message, symbols);
-        } catch {}
+        } catch (e) {
+          console.error(`[listener] parse error: ${e.message} — raw: ${line.slice(0, 80)}`);
+        }
       }
     });
 
-    res.on('end', () => {
-      console.log('[listener] SSE connection closed, reconnecting...');
+    res.data.on('end', () => {
+      console.log('[listener] SSE connection closed, reconnecting in 5s...');
       setTimeout(() => connect(cmdTopic, symbols), 5000);
     });
-  });
 
-  req.on('error', () => {
+    res.data.on('error', () => {
+      setTimeout(() => connect(cmdTopic, symbols), 5000);
+    });
+
+  }).catch(() => {
     setTimeout(() => connect(cmdTopic, symbols), 5000);
   });
 }
