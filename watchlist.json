@@ -1,0 +1,26 @@
+[
+  {
+    "symbol": "^VIX",
+    "conditions": [
+      { "id": "vix-above-20",   "type": "price_above", "value": 20 },
+      { "id": "vix-day-up-5",   "type": "pct_day",     "value": 5  },
+      { "id": "vix-vol-spike",  "type": "volume_spike", "value": 2  }
+    ]
+  },
+  {
+    "symbol": "NFLX",
+    "conditions": [
+      { "id": "nflx-above-100", "type": "price_above",  "value": 100 },
+      { "id": "nflx-day-up-5",  "type": "pct_day",      "value": 5   },
+      { "id": "nflx-vol-spike", "type": "volume_spike",  "value": 2   }
+    ]
+  },
+  {
+    "symbol": "CVNA",
+    "conditions": [
+      { "id": "cvna-above-80",  "type": "price_above",  "value": 80 },
+      { "id": "cvna-day-up-5",  "type": "pct_day",      "value": 5  },
+      { "id": "cvna-vol-spike", "type": "volume_spike",  "value": 2  }
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: stock-alerts
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: NTFY_TOPIC
+        sync: false
+      - key: POLL_INTERVAL_SECONDS
+        value: 30
