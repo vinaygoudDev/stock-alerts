@@ -4,6 +4,7 @@ const { fetchAll, resolveNames, getName } = require('./poller');
 const { evaluate, label }                 = require('./conditions');
 const { send, priorityFor, tagsFor }      = require('./notifier');
 const { shouldFire }                      = require('./state');
+const { startListener }                   = require('./listener');
 const watchlist                           = require('../watchlist.json');
 
 const INTERVAL = parseInt(process.env.POLL_INTERVAL_SECONDS || '30', 10) * 1000;
@@ -57,6 +58,7 @@ async function start() {
     console.error(`[notifier] startup ping failed: ${e.message}`);
   }
 
+  startListener(symbols);
   poll();
   setInterval(poll, INTERVAL);
 }
