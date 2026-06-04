@@ -14,9 +14,8 @@ function evaluate(condition, quote) {
     case 'price_below':
       return quote.price < value;
     case 'pct_day':
-      return value >= 0
-        ? quote.pctDay >= value
-        : quote.pctDay <= value;
+      if (quote.pctDay === null) return false;
+      return value >= 0 ? quote.pctDay >= value : quote.pctDay <= value;
     case 'volume_spike':
       if (!quote.avgVolume || !quote.todayVolume) return false;
       return quote.todayVolume > value * quote.avgVolume;
@@ -34,10 +33,12 @@ function label(condition, quote) {
       return `Price crossed above $${value} — now $${quote.price}`;
     case 'price_below':
       return `Price dropped below $${value} — now $${quote.price}`;
-    case 'pct_day':
+    case 'pct_day': {
+      const pct = quote.pctDay !== null ? quote.pctDay : '?';
       return value >= 0
-        ? `Up ${sign}${quote.pctDay}% today (above your +${value}% alert)`
-        : `Down ${quote.pctDay}% today (below your ${value}% alert)`;
+        ? `Up +${pct}% today (above your +${value}% alert)`
+        : `Down ${pct}% today (below your ${value}% alert)`;
+    }
     case 'volume_spike': {
       const ratio = quote.avgVolume ? (quote.todayVolume / quote.avgVolume).toFixed(1) : '?';
       return `Volume spike — ${ratio}x the 30-day average (your alert: ${value}x)`;

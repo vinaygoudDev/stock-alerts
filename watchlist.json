@@ -2,9 +2,8 @@
   {
     "symbol": "^VIX",
     "conditions": [
-      { "id": "vix-above-20",   "type": "price_above", "value": 20 },
-      { "id": "vix-day-up-5",   "type": "pct_day",     "value": 5  },
-      { "id": "vix-vol-spike",  "type": "volume_spike", "value": 2  }
+      { "id": "vix-above-20",  "type": "price_above", "value": 20 },
+      { "id": "vix-day-up-5",  "type": "pct_day",     "value": 5  }
     ]
   },
   {

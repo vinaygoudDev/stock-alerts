@@ -63,9 +63,9 @@ async function handleCommand(message, symbols) {
     }
 
     const lines = quotes.map(q => {
-      const sign  = q.pctDay >= 0 ? '+' : '';
-      const arrow = q.pctDay >= 0 ? '↑' : '↓';
-      return `${arrow} ${q.symbol} $${q.price}  ${sign}${q.pctDay}% today`;
+      const pctStr = q.pctDay !== null ? `${q.pctDay >= 0 ? '+' : ''}${q.pctDay}%` : 'N/A';
+      const arrow  = (q.pctDay ?? 0) >= 0 ? '↑' : '↓';
+      return `${arrow} ${q.symbol}  $${q.price}  ${pctStr} today`;
     });
 
     await send({

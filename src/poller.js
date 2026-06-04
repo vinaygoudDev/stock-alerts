@@ -7,15 +7,24 @@ const nameCache   = {};
 const volumeCache = {};
 const VOLUME_TTL  = 60 * 60 * 1000;
 
+// Friendly display names for indices that Finnhub won't resolve
+const INDEX_NAMES = {
+  '^VIX':  'CBOE Volatility Index',
+  '^GSPC': 'S&P 500',
+  '^DJI':  'Dow Jones',
+  '^IXIC': 'NASDAQ Composite',
+};
+
 async function resolveNames(symbols) {
   for (const symbol of symbols) {
     if (nameCache[symbol]) continue;
+    if (INDEX_NAMES[symbol]) { nameCache[symbol] = INDEX_NAMES[symbol]; continue; }
     try {
       const { data } = await axios.get(`${BASE}/stock/profile2`, {
         params: { symbol, token: process.env.FINNHUB_API_KEY },
         timeout: 8000,
       });
-      nameCache[symbol] = data.name || symbol;
+      nameCache[symbol] = (data && data.name) ? data.name : symbol;
     } catch {
       nameCache[symbol] = symbol;
     }
@@ -64,8 +73,9 @@ async function fetchQuote(symbol) {
 
   if (!data || data.c === 0) throw new Error(`No data for ${symbol}`);
 
-  const pctDay      = data.pc > 0 ? ((data.c - data.pc) / data.pc) * 100 : 0;
-  const volumeData  = await fetchVolumeData(symbol);
+  // null means "no valid data" — conditions that need pctDay will skip rather than use 0
+  const pctDay     = data.pc > 0 ? parseFloat(((data.c - data.pc) / data.pc * 100).toFixed(2)) : null;
+  const volumeData = await fetchVolumeData(symbol);
 
   return {
     symbol,
@@ -74,7 +84,7 @@ async function fetchQuote(symbol) {
     prevClose:   data.pc,
     high:        data.h,
     low:         data.l,
-    pctDay:      parseFloat(pctDay.toFixed(2)),
+    pctDay,
     avgVolume:   volumeData?.avgVolume   ?? null,
     todayVolume: volumeData?.todayVolume ?? null,
   };
